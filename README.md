@@ -1,1 +1,2 @@
-# nia-d-o-progressive-encoding-experiment
+# NIA D&O Liability Policy - Progressive Encoding Experiment
+This project is an experiment in which we encode a Directors and Officers Liability policy from the Nonprofit Insurance Alliance in increasing levels of detail/complexity. 
