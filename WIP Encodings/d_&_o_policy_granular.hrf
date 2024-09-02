@@ -1,0 +1,649 @@
+% Why sometimes 'the "Member"' and other times 'a "Member"'?
+
+% Acknowledged - still processing children
+covers(Policy, Claim) :-
+    policy.type(Policy, nia_d_o_coverage) &
+    claim.policy(Claim, Policy) &
+    insurable_event(Claim) &            % A
+    conditions_met(Claim) &             % B
+    ~exclusion_applies(Claim)           % C (Encoding removed for this demo, per Chris Reed's instruction. Treating this as a base relation for now)
+
+
+% Helper
+claim.organization(Claim, Org) :-
+    claim.policy(Claim, Policy) &
+    policy.organization(Policy, Org)
+
+% Helper
+claim.insuring_company(Claim, Company) :-
+    claim.policy(Claim, Policy) &
+    policy.insuring_company(Policy, Company)
+
+%%%% A
+% Acknowledged - still processing children
+insurable_event(Claim) :-
+    filed_by_on_behalf_of_or_with_respect_to_valid_entity(Claim) &  % 1
+    regarding_covered_wrongful_act(Claim) &                         % 3 and 4
+    covered_monetary_damages(Claim) &                               % 5, 6, and 7
+    request_from_valid_entity(Claim) &                              % 8
+    ~invalid_admission_of_wrongdoing(Claim) &                       % 2
+    ~arose_from_wrongful_act_of_members_partner(Claim)              % 9
+
+% 1.a
+filed_by_on_behalf_of_or_with_respect_to_valid_entity(Claim) :-
+    filed_by_on_behalf_of_or_with_respect_to(Claim, WRT_entity) &
+    is_member_for_claim(Claim, WRT_entity)
+
+filed_by_on_behalf_of_or_with_respect_to(Claim, WRT_entity) :-
+    claim.filed_by(Claim, WRT_entity)
+
+filed_by_on_behalf_of_or_with_respect_to(Claim, WRT_entity) :-
+    claim.filed_on_behalf_of(Claim, WRT_entity)
+
+filed_by_on_behalf_of_or_with_respect_to(Claim, WRT_entity) :-
+    claim.filed_with_respect_to(Claim, WRT_entity)
+
+% 1.a.i
+is_member_for_claim(Claim, WRT_entity) :-
+    claim.organization(Claim, WRT_entity)
+
+% 1.a.ii
+is_member_for_claim(Claim, WRT_entity) :-
+    claim.organization(Claim, Org) &
+    is_org_member(Org, WRT_entity) &
+    claim.filed_by_member_solely_in_capacity_as_such(Claim, yes)
+
+is_org_member(Org, Person) :-
+    organization.director_entity(Org, Person)
+
+is_org_member(Org, Person) :-
+    organization.trustee_entity(Org, Person)
+
+is_org_member(Org, Person) :-
+    organization.officer_entity(Org, Person)
+
+is_org_member(Org, Person) :-
+    organization.committee_member_entity(Org, Person)
+
+is_org_member(Org, Person) :-
+    organization.volunteer_entity(Org, Person)
+
+
+% 1.a.iii
+is_member_for_claim(Claim, WRT_entity) :-
+    claim.organization(Claim, Org) &
+    person.spouse(WRT_entity, Spouse) &
+    is_org_member(Org, Spouse)
+
+
+% 1.b
+% claim or wrongful act of a deceased member or a claim against the estate, heirs, or legal representaives of such a Member
+filed_by_on_behalf_of_or_with_respect_to_valid_entity(Claim) :-
+    filed_by_on_behalf_of_or_with_respect_to(Claim, WRT_entity) &
+    is_member_for_claim(Claim, WRT_entity) &
+    person.deceased(WRT_entity)
+
+filed_by_on_behalf_of_or_with_respect_to_valid_entity(Claim) :-
+    filed_by_on_behalf_of_or_with_respect_to(Claim, Act) &
+    type_of_wrongful_act(Act) &
+    event.act_taken_by(Act, Person) &
+    person.deceased(Person) &
+    is_member_for_claim(Claim, Person)
+
+filed_by_on_behalf_of_or_with_respect_to_valid_entity(Claim) :-
+    filed_by_on_behalf_of_or_with_respect_to(Claim, WRT_entity) &
+    claim.filed_against(Claim, WRT_entity) & % Likely redundant with the preceding subgoal
+    estate.decedent(WRT_entity, Decedent) &
+    is_member_for_claim(Claim, Decedent) &
+    person.deceased(Decedent)
+
+filed_by_on_behalf_of_or_with_respect_to_valid_entity(Claim) :-
+    filed_by_on_behalf_of_or_with_respect_to(Claim, WRT_entity) &
+    claim.filed_against(Claim, WRT_entity) & % Likely redundant with the preceding subgoal
+    person.legal_representative(Decedent, WRT_entity) &
+    is_member_for_claim(Claim, Decedent) &
+    person.deceased(Decedent)
+
+filed_by_on_behalf_of_or_with_respect_to_valid_entity(Claim) :-
+    filed_by_on_behalf_of_or_with_respect_to(Claim, WRT_entity) &
+    claim.filed_against(Claim, WRT_entity) & % Likely redundant with the preceding subgoal
+    person.heir_to(WRT_entity, Decedent) &
+    is_member_for_claim(Claim, Decedent) &
+    person.deceased(Decedent)
+
+% 1.c
+filed_by_or_on_behalf_of(Claim, WRT_entity) :-
+    claim.filed_by(Claim, WRT_entity)
+
+filed_by_or_on_behalf_of(Claim, WRT_entity) :-
+    claim.filed_on_behalf_of(Claim, WRT_entity)
+
+is_subsidiary_of_claim_org(Claim, Subsidiary) :-
+    claim.organization(Claim, Org) & 
+    organization.subsidiary(Org, Subsidiary)
+
+filed_by_on_behalf_of_or_with_respect_to_valid_entity(Claim) :-
+    filed_by_or_on_behalf_of(Claim, Filer) &
+    policy.named_member(Policy, Filer) &
+    is_subsidiary_of_claim_org(Claim, Filer) & % assuming what it should be a subsidiary of
+    organization.startdate(Filer, OrgSD) &
+    policy.startdate(Policy, PolicySD) &
+    leq_date(OrgSD, PolicySD)
+
+% 1.d
+subsidiary_creation_or_acquisition_event(Claim, Subsidiary, CreationEvent) :-
+    is_subsidiary_of_claim_org(Claim, Subsidiary) &
+    organization.creation_event(Subsidiary, CreationEvent) &
+    event.creation_event_creator(CreationEvent, Creator) &
+    is_member_for_claim(Claim, Creator)
+    
+
+subsidiary_creation_or_acquisition_event(Claim, Subsidiary, AcquisitionEvent) :-
+    is_subsidiary_of_claim_org(Claim, Subsidiary) &
+    organization.acquisition_event(Subsidiary, AcquisitionEvent) &
+    event.acquisition_event_acquirer(AcquisitionEvent, Acquirer) &
+    is_member_for_claim(Claim, Acquirer)
+
+
+org_created_or_acquired_by_member_necessary_steps(Claim, WRT_entity) :-
+    subsidiary_creation_or_acquisition_event(Claim, WRT_entity, CreationOrAcqEvent) &
+    claim.policy(Claim, Policy) &
+    event.startdate(CreationOrAcqEvent, CreationOrAcqDate) &
+    policy.startdate(Policy, PolicySD) &
+    lt(PolicySD, CreationOrAcqDate) &
+    policy.written_notice_to_company(Policy, Notice) &
+    notice.regarding_event(Notice, CreationOrAcqEvent) &
+    notice.date(Notice, NoticeDate) &
+    days_after(NoticeDate, CreationOrAcqDate, DaysAfter) &
+    leq(DaysAfter, 120) &
+    policy.underwriting_information_given_for_event(Policy, CreationOrAcqEvent) & % Breaks yes/no rule for policy- or claim-specific boolean predicates
+    policy.additional_premium_paid_for_event(Policy, CreationOrAcqEvent)
+
+filed_by_on_behalf_of_or_with_respect_to_valid_entity(Claim) :-
+    filed_by_on_behalf_of_or_with_respect_to(Claim, WRT_entity) &
+    is_subsidiary_of_claim_org(Claim, WRT_entity) &
+    organization.is_501c3(WRT_entity, yes) &
+    org_created_or_acquired_by_member_necessary_steps(Claim, WRT_entity)
+
+
+% 1.e TODO: Ask Oliver about this. Seems contradictory/pointless (ACTUALLY just incorrectly written)
+filed_by_on_behalf_of_or_with_respect_to_valid_entity(Claim) :-
+    filed_by_on_behalf_of_or_with_respect_to(Claim, WRT_entity) &
+    is_subsidiary_of_claim_org(Claim, WRT_entity) &
+    organization.is_501c3(WRT_entity, no) &
+
+% 1.f
+org_consolidation_or_merger_event(Claim, ConsolidationEvent) :-
+    claim.organization(Claim, Org) & 
+    organization.consolidation_event(Org, ConsolidationEvent) &
+    event.consolidation_event_consolidated_org(ConsolidationEvent, Org)
+
+org_consolidation_or_merger_event(Claim, MergerEvent) :-
+    claim.organization(Claim, Org) & 
+    organization.merger_event(Org, MergerEvent) &
+    event.merger_event_merged_org(MergerEvent, Org)
+
+filed_by_on_behalf_of_or_with_respect_to_valid_entity(Claim) :-
+    filed_by_on_behalf_of_or_with_respect_to(Claim, WRT_entity) &
+    org_consolidation_or_merger_event(Claim, ConsolidationOrMergerEvent) &
+    event.successor_org(ConsolidationOrMergerEvent, WRT_entity) &
+    claim.policy(Claim, Policy) &
+    policy.written_notice_to_company(Policy, Notice) &
+    notice.regarding_event(Notice, ConsolidationOrMergerEvent) &
+    notice.given_together_with_required_information(Notice, yes) &
+    notice.date(Notice, NoticeDate) &
+    event.startdate(ConsolidationOrMergerEvent, ConsolidationOrMergerSD) &
+    days_after(NoticeDate, ConsolidationOrMergerSD, DaysAfter) &
+    leq(DaysAfter, 30) & 
+    policy.additional_premium_paid_for_event(Policy, ConsolidationOrMergerSD)
+
+
+% 2
+% Note: some interpretation here that I should run by Oliver
+invalid_admission_of_wrongdoing(Claim) :-
+    filed_by_on_behalf_of_or_with_respect_to(Claim, WRT_entity) &
+    requesting_entity_admitted_wrongdoing(Claim, WRT_entity) &
+    claim.company_gave_prior_written_consent_for_admission_of_wrongdoing(Claim, no)
+
+requesting_entity_admitted_wrongdoing(Claim, WRT_entity) :-
+    claim.voluntarily_paid_for_by(Claim, WRT_entity)
+
+requesting_entity_admitted_wrongdoing(Claim, WRT_entity) :-
+    claim.voluntarily_admitted_liability_for_by(Claim, WRT_entity)
+
+requesting_entity_admitted_wrongdoing(Claim, WRT_entity) :-
+    defense_costs_incurred_by(WRT_entity)
+
+
+% 3 and 4
+    % 3
+type_of_wrongful_act(Act) :- % assuming only 3a lists wrongful acts, and further portions of 3 are properties of *covered* wrongful acts
+    event.is_error(Act, yes)
+
+type_of_wrongful_act(Act) :-
+    event.is_neglect(Act, yes)
+
+type_of_wrongful_act(Act) :-
+    event.is_omission(Act, yes)
+
+type_of_wrongful_act(Act) :-
+    event.is_act(Act, yes)
+
+act_occurred_during_policy_period(Claim, Act) :-
+    event.date(ResultedFrom, EventDate) &
+    claim.policy(Claim, Policy) &
+    policy.startdate(Policy, SD) &
+    policy.enddate(Policy, ED) &
+    leq_date(SD, EventDate) &
+    leq_date(EventDate, ED)
+
+act_committed_solely_in_course_of_activities_of_organization(Claim, Act) :-
+    claim.organization(Claim, Org) &
+    event.committed_solely_in_course_of_activities_of_organization(Act, Org)
+
+    % 4
+% TODO: Ask Oliver about interpretation of "Any other claim"
+
+% 4.a.ii
+    % 4.a.ii.1
+personal_injury_covered_causal_offense(CausalEvent) :-
+    event.is_false_arrest(CausalEvent, yes)
+
+personal_injury_covered_causal_offense(CausalEvent) :-
+    event.is_wrongful_detention_or_imprisonment(CausalEvent, yes)
+
+personal_injury_covered_causal_offense(CausalEvent) :-
+    event.is_abuse_of_process(CausalEvent, yes)
+
+personal_injury_covered_causal_offense(CausalEvent) :-
+    event.is_malicious_persecution(CausalEvent, yes)
+
+    % 4.a.ii.2
+personal_injury_covered_causal_offense(CausalEvent) :-
+    event.is_libel(CausalEvent, yes)
+
+personal_injury_covered_causal_offense(CausalEvent) :-
+    event.is_slander(CausalEvent, yes)
+
+personal_injury_covered_causal_offense(CausalEvent) :-
+    event.is_defamation_of_character(CausalEvent, yes)
+
+personal_injury_covered_causal_offense(CausalEvent) :-
+    event.is_invasion_of_privacy(CausalEvent, yes)
+
+    % 4.a.ii.3
+personal_injury_covered_causal_offense(CausalEvent) :-
+    event.is_wrongful_entry(CausalEvent, yes)
+
+personal_injury_covered_causal_offense(CausalEvent) :-
+    event.is_wrongful_eviction(CausalEvent, yes)
+
+personal_injury_covered_causal_offense(CausalEvent) :-
+    event.is_invasion_of_right_of_privacy(CausalEvent, yes) % Redundant with before?
+
+    % 4.a.ii.4
+personal_injury_covered_causal_offense(CausalEvent) :-
+    event.is_infringement_of_copyright_or_trademark(CausalEvent, yes)
+
+personal_injury_covered_causal_offense(CausalEvent) :-
+    event.is_unauthorized_use_of_title(CausalEvent, yes)
+
+    % 4.a.ii.5
+personal_injury_covered_causal_offense(CausalEvent) :-
+    event.is_plagiarism(CausalEvent, yes)
+
+personal_injury_covered_causal_offense(CausalEvent) :-
+    event.is_misappropriation_of_ideas(CausalEvent, yes)
+
+% 4.a (including 4.a.i)
+covered_personal_injury_result(Claim, Act, ResultedIn) :-
+    event.is_personal_injury(ResultedIn, yes) &
+    claim.organization(Claim, Org) &
+    event.committed_in_course_of_business_of_organization(Act, Org, yes) & % TODO: check interpretation of which event was "committed". Neither seem quite right to me.
+    event.caused_by(ResultedIn, CausalEvent) &
+    personal_injury_covered_causal_offense(CausalEvent)
+
+% 4.b and c
+harassment_or_discrimination_claim(Claim) :-
+    claim.is_harassment_claim(Claim, yes) % Breaks yes/no rule for policy- or claim-specific boolean predicates
+
+harassment_or_discrimination_claim(Claim) :-
+    claim.is_discrimination_claim(Claim, yes) % Breaks yes/no rule for policy- or claim-specific boolean predicates
+    
+    % 4.b 
+brought_by_volunteer_or_business_invitee(ResultedIn, Claimant, Org) :-
+    claim.brought_by_volunteer_of_org_solely_in_capacity_as_volunteer(ResultedIn, Claimant, Org, yes) % Breaks yes/no rule for policy- or claim-specific boolean predicates
+
+    % 4.c
+brought_by_volunteer_or_business_invitee(ResultedIn, Claimant, Org) :-
+    claim.brought_by_third_party_business_invitee_of_org_in_capacity_as_business_invitee(ResultedIn, Claimant, Org, yes) % Breaks yes/no rule for policy- or claim-specific boolean predicates
+
+claim_resulted_in_covered_claim(Claim, ResultedIn) :-
+    harassment_or_discrimination_claim(ResultedIn) &
+    claim.claimant(ResultedIn, Claimant) & % TODO (resolved): See if "brought by" is same as "claimant" (it is)
+    claim.organization(Claim, Org) &
+    organization.past_or_present_volunteer(Org, Claimant) &
+    brought_by_volunteer_or_business_invitee(ResultedIn, Claimant, Org)
+
+
+% 4
+    % a
+covered_result_of_act(Claim, ClaimResultedFrom, ClaimResultedIn) :-
+    covered_personal_injury_result(Claim, ClaimResultedFrom, ClaimResultedIn)
+    
+    % b and c
+covered_result_of_act(Claim, ClaimResultedFrom, ClaimResultedIn) :-
+    claim_resulted_in_covered_claim(Claim, ClaimResultedIn)
+    
+    % d - Note: Part of my "Any other claim" confusion
+covered_result_of_act(Claim, ClaimResultedFrom, ClaimResultedIn) :-
+    type(ClaimResultedIn, claim) &
+    ~covered_personal_injury_result(Claim, ClaimResultedFrom, ClaimResultedIn) &
+    ~claim_resulted_in_covered_claim(Claim, ClaimResultedIn)
+
+
+
+% Subgoals 2-4 are point 3, last two are point 4
+regarding_covered_wrongful_act(Claim) :-
+    claim.resulted_from_event(Claim, ClaimResultedFrom) &
+    type_of_wrongful_act(ClaimResultedFrom) &
+    act_occurred_during_policy_period(Claim, ClaimResultedFrom) &
+    act_committed_solely_in_course_of_activities_of_organization(Claim, ClaimResultedFrom) & % Breaks yes/no rule for policy- or claim-specific boolean predicates
+    event.resulted_in(ClaimResultedFrom, ClaimResultedIn) &
+    covered_result_of_act(Claim, ClaimResultedFrom, ClaimResultedIn)
+
+% 5, 6, 7
+covered_monetary_damages(Claim) :-
+    monetary_damages_sought_event(Claim, DamagesEvent) &    % 5
+    covered_compensatory_damages(Claim, DamagesEvent) &     % 6
+    ~damages_solely_include_damages_listed_in_a_7(DamagesEvent) % 7
+
+% 5
+valid_monetary_damages_event_against_filer_direct(Filer, Event) :-
+    event.is_demand_against(Event, Filer, yes)
+    
+valid_monetary_damages_event_against_filer_direct(Filer, Event) :-
+    event.is_judicial_or_administrative_suit_against(Event, Filer, yes)
+    
+valid_monetary_damages_event_against_filer_direct(Filer, Event) :-
+    event.is_proceeding_against(Event, Filer, yes)
+
+valid_monetary_damages_event_against_filer_appeal(Filer, Event) :- % (resolved, but not implemented): Is the appeal transitive? Currently not implemented as such (Answer: YES)
+    event.is_appeal_of(Appeal, Event) &
+    valid_monetary_damages_event_against_filer_direct(Filer, Event)
+
+valid_monetary_damages_event_against_filer(Filer, Event) :-
+    valid_monetary_damages_event_against_filer_direct(Filer, Event)
+
+valid_monetary_damages_event_against_filer(Filer, Event) :-
+    valid_monetary_damages_event_against_filer_appeal(Filer, Event)
+
+monetary_damages_sought_event(Claim, Event) :-
+    filed_by_on_behalf_of_or_with_respect_to(Claim, WRT_entity) & 
+    valid_monetary_damages_event_against_filer(WRT_entity, Event) &
+    event.seeks_monetary_damages(Event, yes)
+
+
+% 6
+seeking_attorney_or_expert_witness_fees(DamagesEvent) :-
+    event.compensatory_damages_type(DamagesEvent, claimants_attorneys_fees)
+
+seeking_attorney_or_expert_witness_fees(DamagesEvent) :-
+    event.compensatory_damages_type(DamagesEvent, expert_witness_fees)
+
+awarded_pursuant_to_contract_statute_or_law(DamagesEvent) :-
+    event.compensatory_damages_awarded_pursuant_to_contract(DamagesEvent, yes)
+
+awarded_pursuant_to_contract_statute_or_law(DamagesEvent) :-
+    event.compensatory_damages_awarded_pursuant_to_statute(DamagesEvent, yes)
+
+awarded_pursuant_to_contract_statute_or_law(DamagesEvent) :-
+    event.compensatory_damages_awarded_pursuant_to_law(DamagesEvent, yes)
+
+covered_compensatory_attorney_or_witness_fees_damages(Claim, DamagesEvent) :-
+    event.monetary_judgment_for_compensatory_damages(DamagesEvent, yes) &
+    seeking_attorney_or_expert_witness_fees(DamagesEvent) &
+    awarded_pursuant_to_contract_statute_or_law(DamagesEvent) &
+    event.seeks_monetary_damages(Event, yes)                    % I believe this subgoal is an accurate interepretation, but it is logically redundant.
+
+% This should be impossible, but is accurate translation. See comment on redundancy above.
+excluded_compensatory_attorney_or_witness_fees_damages(Claim, DamagesEvent) :-
+    event.monetary_judgment_for_compensatory_damages(DamagesEvent, yes) &
+    seeking_attorney_or_expert_witness_fees(DamagesEvent) &
+    awarded_pursuant_to_contract_statute_or_law(DamagesEvent) &
+    event.seeks_monetary_damages(Event, no)
+
+covered_compensatory_non_attorney_or_witness_fees_damages(Claim, DamagesEvent) :-
+    event.monetary_judgment_for_compensatory_damages(DamagesEvent, yes) &
+    ~excluded_compensatory_attorney_or_witness_fees_damages(Claim, DamagesEvent)
+
+covered_compensatory_damages(Claim, DamagesEvent) :-
+    covered_compensatory_attorney_or_witness_fees_damages(Claim, DamagesEvent)
+
+covered_compensatory_damages(Claim, DamagesEvent) :-
+    covered_compensatory_non_attorney_or_witness_fees_damages(Claim, DamagesEvent)
+
+% 7
+list(nil)
+list(cons(X, Y)) :- list(Y)
+
+subset(nil, Y) :- list(Y)
+subset(X!L, Y) :- member(X, Y) & subset(L, Y)
+
+damages_solely_include_damages_listed_in_a_7(DamagesEvent) :-
+    evaluate(setofall(DamagesType, event.compensatory_damages_type(DamagesEvent, DamagesType)), DamagesList) &
+    subset(DamagesList, 
+        [taxes,
+        severance_payments, 
+        amounts_to_reimburse_employee_for_expenses_incurred_as_result_of_employment,
+        equitable_relief,
+        injunctive_relief,
+        matters_uninsurable_under_law_pursuant_to_which_policy_is_construed])
+
+% 8
+incorporated_or_can_do_business_in_california(Org) :-
+    organization.incorporated_in_state(Org, california)
+
+incorporated_or_can_do_business_in_california(Org) :-
+    organization.qualified_to_do_business_in_state(Org, california)
+
+request_from_valid_entity(Claim) :-
+    filed_by_on_behalf_of_or_with_respect_to(Claim, WRT_entity) &
+    claim.organization(Claim, WRT_entity) &
+    organization.entity_organized_chiefly_to_provide_or_fund_services_of_type(WRT_entity, ServiceType) &
+    member(Purpose, 
+        [charitable,
+        religious,
+        educational,
+        scientific,
+        health,
+        human]) &
+    organization.is_501c3(WRT_entity, yes) &
+    organization.tax_exempt_under_501a_or_corresponding_section(WRT_entity, yes)&
+    incorporated_or_can_do_business_in_california(WRT_entity)
+
+% 9
+% Policy wording seems overly restrictive, e.g. if two members are married to one another then neither are covered
+
+spouse_or_domestic_partner_of_member(Spouse, Claim) :-
+    person.spouse(Member, Spouse) &
+    is_member_for_claim(Claim, Member)
+
+spouse_or_domestic_partner_of_member(DomesticPartner, Claim) :-
+    person.domestic_partner(Member, DomesticPartner) &
+    is_member_for_claim(Claim, Member)
+
+arose_from_wrongful_act_of_members_partner(Claim) :-
+    claim.resulted_from_event(Claim, WrongfulAct) &
+    type_of_wrongful_act(WrongfulAct) &
+    event.act_taken_by(WrongfulAct, Person) &
+    spouse_or_domestic_partner_of_member(Person, Claim)
+
+
+%%%% B
+conditions_met(Claim) :-
+    claim.policy(Claim, Policy) &
+    evaluate(countofall(Member,is_member_for_claim(Claim, Member) & member_did_not_cooperate(Claim, Member)), 0) & % 11
+    evaluate(countofall(Member,is_member_for_claim(Claim, Member) & claim.insuring_company(Claim, Company) & member_did_not_promptly_give_required_notice_to_company(Member, Company)), 0) & % 12.a
+    claim_results_from_act_committed_during_policy_period(Claim) & % 12.b, TODO: Ask Oliver if I'm interpreting this right, as it doesn't seem like it's related to 12.a
+    evaluate(countofall(Member,is_member_for_claim(Claim, Member) & claim.insuring_company(Claim, Company) & member_did_not_promptly_give_written_notice_to_company_of_claims_or_did_not_give_required_info_and_cooperation(Claim, Member, Company)), 0) & % 13
+    evaluate(countofall(FalseRepresentationOrStatement, false_representation_or_statement(Claim, FalseRepresentationOrStatement)), 0) & % 14
+    covered_determination_of_responsibility_to_pay_damages(Claim) & % 15
+    transferred_all_rights_to_recover_payment(Claim) &                  % 16
+    ~policy.canceled(Policy, yes)       % 10
+    
+
+% 11
+member_did_not_cooperate(Claim, Member) :-
+    event.is_failure_made_by(FailureEvent, Member, yes) &
+    is_excluded_member_failure_event(Member, FailureEvent) &
+    claim.policy(Claim, Policy) &
+    ~policy_voided_by_company_due_to_event(Policy, FailureEvent)
+
+
+    % 11.a.i
+is_excluded_member_failure_event(Member, FailureEvent) :-
+    event.is_failure_to_promptly_send_copies_of_demands_notices_summonses_and_legal_papers_in_connection_to_claim(FailureEvent, SomeClaim, yes)
+
+    % 11.a.ii
+is_excluded_member_failure_event(Member, FailureEvent) :-
+    event.is_failure_to_authorize_company_to_obtain_records_and_other_information(FailureEvent, yes)
+
+    % 11.a.iii
+is_excluded_member_failure_event(Member, FailureEvent) :-
+    event.is_failure_to_assist_company_in_enforcement_of_any_right_against_person_or_organization_which_may_be_liable_to_member(FailureEvent, PersonOrOrg, Member, yes)
+
+    % 11.a.iv
+        % The contract wording here doesn't seem like valid English to me
+is_excluded_member_failure_event(Member, FailureEvent) :-
+    event.is_failure_to_attend_hearings_trials_and_depositions_and_securing_and_giving_evidence_or_to_obtain_attendance_of_witnesses(FailureEvent, PersonOrOrg, Member, yes)
+
+    % 11.b
+        % End of the contract wording for this point is lost on me
+policy_voided_by_company(Policy, FailureEvent) :-
+    policy.voided(Policy, yes) &
+    policy.voiding_event(Policy, VoidingEvent) &
+    policy.insuring_company(Policy, Company) &
+    event.voiding_event_initiated_by(VoidingEvent, Company) &
+    event.voiding_event_reason(VoidingEvent, ReasonEvent) &
+    event.is_sustenance_of_actual_and_substantial_prejudice(ReasonEvent, yes) &
+    event.entity_sustained_actual_and_substantial_prejudice_due_to(ReasonEvent, Company, FailureEvent)
+
+% 12
+    % 12.a
+notice_of_event_sent_by_member_to_company(Member, Company, Event, Notice) :-
+    notice.regarding_event(Notice, Event) &
+    notice.sent_by(Notice, Member) &
+    notice.sent_to(Notice, Company)
+
+member_did_not_promptly_give_required_notice_to_company(Member, Company) :-
+    event.is_reception_by_member_of_written_or_oral_notice_from_any_person_or_entity_that_it_is_their_intention_to_hold_a_member_responsible_for_a_wrongful_act(ReceptionEvent, Member, yes) &
+    evaluate(countofall(Notice, notice_of_event_sent_by_member_to_company(Member, Company, ReceptionEvent, Notice)), 0)
+
+member_did_not_promptly_give_required_notice_to_company(Member, Company) :-
+    event.became_aware_of_circumstances_which_may_subsequently_give_rise_to_a_claim_or_claims_being_made_against_a_member_for_a_wrongful_act(AwarenessEvent, Member, yes) &
+    evaluate(countofall(Notice, notice_of_event_sent_by_member_to_company(Member, Company, AwarenessEvent, Notice)), 0)
+
+    % 12.b
+
+claim_results_from_act_committed_during_policy_period(Claim) :-
+    claim.policy(Claim, Policy) &
+    claim.resulted_from_event(Claim, ClaimResultedFrom) &
+    type_of_wrongful_act(ClaimResultedFrom) &
+    event.date(ClaimResultedFrom, EventDate) &
+    policy.startdate(Policy, PolicySD) &
+    policy.enddate(Policy, PolicyED) &
+    leq_date(PolicySD, EventDate) &
+    leq_date(EventDate, PolicyED)
+
+% 13
+    % Note: contract wording likely needs some clause like "that the member was aware of" and restricting to what the claims are regarding
+    % This is an accurate translation, but likely wrong
+notice_of_claim_or_claims(Member, Company, Notice) :-
+    notice.sent_by(Notice, Member) &
+    notice.sent_to(Notice, Company) &
+    notice.regarding_actual_claim_or_claims(Notice, yes)
+
+notice_of_claim_or_claims(Member, Company, Notice) :-
+    notice.sent_by(Notice, Member) &
+    notice.sent_to(Notice, Company) &
+    notice.regarding_potential_claim_or_claims(Notice, yes)
+
+% Missing restriction on what the claims are regarding. Currently an absolute universal over claims
+member_did_not_promptly_give_written_notice_to_company_of_claims_or_did_not_give_required_info_and_cooperation(Claim, Member, Company) :-
+    evaluate(countofall(Notice, notice_of_claim_or_claims(Member, Company, Notice)), 0)
+
+member_did_not_promptly_give_written_notice_to_company_of_claims_or_did_not_give_required_info_and_cooperation(Claim, Member, Company) :-
+    ~claim.info_reasonably_required_by_given_by(Claim, Company, Member)
+
+member_did_not_promptly_give_written_notice_to_company_of_claims_or_did_not_give_required_info_and_cooperation(Claim, Member, Company) :-
+    ~claim.cooperation_reasonably_required_by_given_by(Claim, Company, Member)
+
+% 14
+false_representation_or_statement(Claim, Rep) :-
+    claim.policy(Claim, Policy) &
+    policy.application(Policy, App) &
+    policyapp.representation(App, Rep) &
+    ~representation.is_true(Rep, yes)
+
+false_representation_or_statement(Claim, Stmt) :-
+    claim.policy(Claim, Policy) &
+    policy.application(Policy, App) &
+    policyapp.statement(App, Stmt) &
+    ~statement.is_true(Stmt, yes)
+
+
+% 15
+covered_determination_of_responsibility_to_pay_damages(Claim) :-
+    monetary_damages_sought_event(Claim, SeekDamagesEvent) &
+    event.responsibility_to_pay_sought_damages_determination_event(SeekDamagesEvent, DeterminationEvent) &
+    event.responsibility_to_pay_sought_damages_determined_in_suit(DeterminationEvent, yes) &
+    event.responsibility_to_pay_sought_damages_determined_in_country(DeterminationEvent, united_states)
+
+% 16
+transferred_all_rights_to_recover_payment(Claim) :-
+    evaluate(countofall(Member, is_member_for_claim(Claim, Member) & did_not_transfer_rights_to_recover_payment(Claim, Member)), 0)
+
+did_not_transfer_rights_to_recover_payment(Claim, Member) :-
+    claim.insuring_company(Claim, Company) &
+    claim.policy(Claim, Policy) &
+    claim.organization(Claim, Org) &  
+    evaluate(countofall(Rights, organization.member_has_rights_to_recover_payment_made_by_insuring_company_under_policy_from_an_entity(Org, Member, Rights, Company, Policy) & ~payment_rights_have_been_properly_transferred(Org, Member, Rights, Company), 0))
+
+payment_rights_have_been_properly_transferred(Org, Member, Rights, Company) :-
+    organization.member_has_executed_all_required_documents_to_transfer_payment_rights_to_company(Org, Member, Rights, Company, yes) &
+    organization.member_has_done_everything_necessary_to_secure_payment_rights_for_company(Org, Member, Rights, Company, yes) &
+    organization.member_has_executed_documents_necessary_to_enable_company_to_bring_suit_in_name_of_the_member(Org, Member, Rights, Company, yes) &
+    organization.member_has_done_all_things_reasonably_necessary_to_assist_company_in_enforcing_rights_upon_request_of_company(Org, Member, Rights, Company, yes)
+
+
+%%%%%%% Helper Functions %%%%%%%
+% DaysAfter = Date1 - Date2
+days_after(Date1, Date2, DaysAfter) :-
+    datetimetotimestamp(Date1, 00_00_00, Stamp1) &
+    datetimetotimestamp(Date2, 00_00_00, Stamp2) &
+    evaluate(times(24, 60, 60, 1000), NumMSInOneDay) & 
+    evaluate(floor(quotient(minus(Stamp1, Stamp2), NumMSInOneDay)), DaysAfter)
+
+% datetime helper functions
+datetimetotimestamp(DATE,TIME,STAMP) :-
+    evaluate(parsedate(DATE),[Y,M,D]) &
+    evaluate(parsetime(TIME),[H, N, S]) &
+    evaluate(maketimestamp(Y,M,D,H,N,S),STAMP)
+
+parsedate(DATE) :=
+    map(readstring,tail(matches(stringify(DATE),"(....)_(..)_(..)")))
+
+parsetime(TIME) :=
+  map(readstring,tail(matches(stringify(TIME),"(..)_(..)_(..)")))
+
+overlap(PS,PE,ZS,ZE) :-
+    evaluate(stringmin(ZS,PE),ZS) &
+    evaluate(stringmin(PS,ZE),PS)
+
+
+% leq for dates, specifically
+leq_date(Date1, Date2) :-
+    datetimetotimestamp(Date1, 00_00_00, Stamp1) &
+    datetimetotimestamp(Date2, 00_00_00, Stamp2) &
+    leq(Stamp1, Stamp2)

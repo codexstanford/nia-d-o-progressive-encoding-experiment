@@ -1,0 +1,390 @@
+% C (exclusions)
+
+    % A
+exclusion_applies(Claim) :-
+    claim.resulted_from_event(Claim, Event) &
+    event.is_actual_or_alleged_act_error_or_omission_in_administration_of_employee_benefit_program(Event, yes)
+
+    % B
+exclusion_applies(Claim) :-
+    claim.includes_costs_related_to_providing_reasonable_aca_or_similar_accommodation(Claim, yes)
+
+    % C
+exclusion_applies(Claim) :-
+    claim.regarding_actual_or_alleged_liability_of_others_assumed_by_or_on_behalf_of_a_member_under_any_contract_or_agreement_expressed_or_implied_written_or_oral(Claim, Event) &
+
+    % D
+exclusion_applies(Claim) :-
+    claim.resulted_from_event(Claim, Event) &
+    excluded_blood_donation_drawing_or_testing_event(Claim, Event, Exclusion_D_Num)
+
+        % 1
+excluded_blood_donation_drawing_or_testing_event(Claim, Event, d_1) :-
+    is_rendering_or_failure_to_render_services(Event) &
+    is_in_connection_with_making_of_blood_donation_drawing_or_testing_of_blood(Event)
+
+is_rendering_or_failure_to_render_services(Event) :-
+    event.is_rendering_of_services(Event) 
+
+is_rendering_or_failure_to_render_services(Event) :-
+    event.is_failure_to_render_services(Event) 
+
+is_in_connection_with_making_of_blood_donation_drawing_or_testing_of_blood(Event) :-
+    event.is_in_connection_with_making_a_blood_donation(Event)
+
+is_in_connection_with_making_of_blood_donation_drawing_or_testing_of_blood(Event) :-
+    event.is_in_connection_with_drawing_of_blood(Event)
+
+is_in_connection_with_making_of_blood_donation_drawing_or_testing_of_blood(Event) :-
+    event.is_in_connection_with_testing_of_blood(Event)
+
+        % 2
+excluded_blood_donation_drawing_or_testing_event(Claim, Event, d_2) :-
+    is_error_omission_defect_or_deficiency(Event) &
+    is_regarding_a_test_performed_evaluation_consultation_or_advice_given_by(Event, Entity) &
+    is_member_for_claim(Claim, Entity)
+
+is_error_omission_defect_or_deficiency(Event) :-
+    event.is_error(Event)
+
+is_error_omission_defect_or_deficiency(Event) :-
+    event.is_omission(Event)
+
+is_error_omission_defect_or_deficiency(Event) :-
+    event.is_defect(Event)
+
+is_error_omission_defect_or_deficiency(Event) :-
+    event.is_deficiency(Event)
+
+is_regarding_a_test_performed_evaluation_consultation_or_advice_given_by(Event, Entity) :-
+    event.is_regarding_test_performed_by_or_on_behalf_of(Event, Entity)
+
+is_regarding_a_test_performed_evaluation_consultation_or_advice_given_by(Event, Entity) :-
+    event.is_regarding_evaluation_by_or_on_behalf_of(Event, Entity)
+
+is_regarding_a_test_performed_evaluation_consultation_or_advice_given_by(Event, Entity) :-
+    event.is_regarding_consultation_by_or_on_behalf_of(Event, Entity)
+
+is_regarding_a_test_performed_evaluation_consultation_or_advice_given_by(Event, Entity) :-
+    event.is_regarding_advice_given_by_or_on_behalf_of(Event, Entity)
+
+
+        % 3 - TODO: Check whether "such test, evaluation, consultation or advice requires that there be an error, omission, etc. or just that it be performed by a Member
+excluded_blood_donation_drawing_or_testing_event(Claim, Event, d_3) :-
+    is_regarding_a_test_performed_evaluation_consultation_or_advice_given_by(Event, Entity) &
+    is_member_for_claim(Member, Entity) &
+    claim_is_regarding_reporting_of_or_reliance_upon_event(Claim, Event) :-
+
+claim_is_regarding_reporting_of_or_reliance_upon_event(Claim, Event) :-
+    claim.is_regarding_reporting_of(Claim, Event)
+
+claim_is_regarding_reporting_of_or_reliance_upon_event(Claim, Event) :-
+    claim.is_regarding_reliance_upon(Claim, Event)
+
+
+        % 4
+excluded_blood_donation_drawing_or_testing_event(Claim, Event, d_4) :-
+    is_regarding_blood_product_handling_transporting_or_distributing_on_by_or_on_behalf_of(Event, Entity) &
+    is_member_for_claim(Claim, Entity)
+
+is_regarding_blood_product_handling_transporting_or_distributing_on_by_or_on_behalf_of(Event, Entity) :-
+    event.is_regarding_blood_product_handling_by_or_on_behalf_of(Event, Entity)
+
+is_regarding_blood_product_handling_transporting_or_distributing_on_by_or_on_behalf_of(Event, Entity) :-
+    event.is_regarding_blood_product_transporting_by_or_on_behalf_of(Event, Entity)
+
+is_regarding_blood_product_handling_transporting_or_distributing_on_by_or_on_behalf_of(Event, Entity) :-
+    event.is_regarding_blood_product_distributing_by_or_on_behalf_of(Event, Entity)
+
+excluded_blood_donation_drawing_or_testing_event(Claim, Event) :-
+    event.is_regarding_reliance_upon_representation_made_wrt_blood_products(Event)
+
+excluded_blood_donation_drawing_or_testing_event(Claim, Event) :-
+    event.is_regarding_reliance_upon_warranty_made_wrt_blood_products(Event)
+
+        % 5
+excluded_blood_donation_drawing_or_testing_event(Claim, Event, d_5) :-
+    event.is_regarding_liability_of(Event, Entity) &
+    is_member_for_claim(Claim, Entity) &
+    event.is_regarding_liability_for(Event, LiableForEvent) &
+    is_act_or_omission(LiableForEvent) &
+    event.made_by(LiableForEvent, MadeByEntity) &
+    is_doctor_technician_phlebotomist_or_nurse(MadeByEntity) &
+    event.made_wrt(LiableForEvent, ActOrOmissionMadeWRT) &
+    member(ExclusionNum, [d_1, d_2, d_3, d_4]) &
+    excluded_blood_donation_drawing_or_testing_event(Claim, ActOrOmissionMadeWRT, ExclusionNum)
+
+is_act_or_omission(Event) :-
+    event.is_act(Event)
+
+is_act_or_omission(Event) :-
+    event.is_omission(Event)
+
+        % 6
+excluded_blood_donation_drawing_or_testing_event(Claim, Event, d_6) :-
+    event.is_regarding_liability_of(Event, Entity) &
+    is_member_for_claim(Claim, Entity) &
+    event.is_regarding_liability_for(Event, LiableForEvent) & 
+    is_negligent_hiring_or_supervison_of_wrt(LiableForEvent, _, MadeWRTEvent) &
+    member(ExclusionNum, [d_1, d_2, d_3, d_4]) &
+    excluded_blood_donation_drawing_or_testing_event(Claim, MadeWRTEvent, ExclusionNum)
+    
+is_negligent_hiring_or_supervison_of(Event, Entity, MadeWRTEvent) :-
+    event.is_negligent_hiring_of_wrt(Event, Entity, MadeWRTEvent)
+
+is_negligent_hiring_or_supervison_of(Event, Entity, MadeWRTEvent) :-
+    event.is_negligent_supervision_of(Event, MadeWRTEvent)
+
+
+    % E
+exclusion_applies(Claim) :-
+    claim.arising_out_of_based_upon_attributable_to_or_in_any_way_involving_direcly_or_indirectly_actual_or_alleged_injury_or_property_damage_of_type(Claim, Involved) &
+    member(Involved, [bodily_injury, sickness, disease, death_of_person, physical_injury, damage_to_tangible_property, destruction_of_tangible_property, loss_of_use_of_tangible_property_that_is_not_physically_injured])
+
+    % F
+exclusion_applies(Claim) :-
+    claim.liability_for_payment(Claim, Payment) & 
+    ~payment.type(Payment, defense_costs) &
+    claim.made_against(Claim, MadeAgainstEntity) &
+    is_member_for_claim(Claim, MadeAgainstEntity) &
+    claim.arising_or_alleged_to_have_arisen_from_actual_or_alleged_breach_of_contractual_obligation_of(Claim, MadeAgainstEntity) &
+    claim.contract_or_agreement_breached(Claim, BreachedAgreement) &
+    claim.made_by(Claim, MadeByEntity) &
+    contract.party_or_third_party_beneficiary(BreachedAgreement, MadeByEntity)
+
+
+    % G
+exclusion_applies(Claim) :-
+    claim.made_by(Claim, MadeByEntity) &
+    entity.employee_claimant(MadeByEntity, yes)
+
+exclusion_applies(Claim) :-
+    claim.has_liability_to(Claim, LiableToEntity) &
+    entity.employee_claimant(LiableToEntity, yes)
+
+exclusion_applies(Claim) :-
+    claim.obligation_to_indemnify_another_because_of_claim(Claim, BecauseOfClaim) &
+    claim.made_by(BecauseOfClaim, MadeByEntity) &
+    entity.employee_claimant(MadeByEntity, yes)
+
+exclusion_applies(Claim) :-
+    claim.obligation_to_indemnify_another_because_of_liability_to(Claim, LiableToEntity) &
+    entity.employee_claimant(LiableToEntity, yes)
+
+
+    % H
+exclusion_applies(Claim) :-
+    claim.organization(Claim, Org) &
+    claim.brought_or_maintained_by_or_on_behalf_of(Claim, Org) &
+    claim.brought_on_behalf_of_org_by(Claim, BroughtByEntity) &
+    entity.is_attorney_general(BroughtByEntity, yes)
+
+    % I
+        % I.1
+exclusion_applies(Claim) :-
+    claim.resulted_from_event(Claim, Event) &
+    event.is_actual_or_alleged_transmission_of_a_communicable_disease(Event, yes)
+
+        % I.2
+exclusion_applies(Claim) :-
+    claim.resulted_from_event(Claim, Event) &
+    is_act_error_or_omission(Event) &
+    event.act_by(Event, ActingEntity) &
+    is_member_for_claim(Claim, ActingEntity) &
+    is_communicable_disease_excluded_act_error_or_exclusion(Claim, Event)
+
+
+is_act_error_or_omission(Event) :-
+    event.is_error(Act, yes)
+
+is_act_error_or_omission(Event) :-
+    event.is_act(Act, yes)
+
+is_act_error_or_omission(Event) :-
+    event.is_omission(Act, yes)
+
+            % I.2.a
+is_communicable_disease_excluded_act_error_or_exclusion(Claim, Event) :-
+    event.is_supervision_hiring_employment_training_or_monitoring_of_a_person_who_transmits_is_infected_with_and_or_is_alleged_to_be_infected_with_a_communicable_disease(Event, yes)
+
+            % I.2.b
+is_communicable_disease_excluded_act_error_or_exclusion(Claim, Event) :-
+    event.is_testing_for_communicable_disease(Event, yes)
+
+            % I.2.c
+is_communicable_disease_excluded_act_error_or_exclusion(Claim, Event) :-
+    event.is_actual_or_alleged_failure_to_prevent_the_spread_of_a_communicable_disease(Event, yes)
+
+            % I.2.d
+is_communicable_disease_excluded_act_error_or_exclusion(Claim, Event) :-
+    event.is_actual_or_alleged_failure_to_report_a_communicable_disease_to_the_authorities(Event, yes)
+
+
+    % J
+exclusion_applies(Claim) :-
+    claim.is_of_equitable_relief(Claim, yes)
+
+    % K
+exclusion_applies(Claim) :-
+    claim.arising_out_of_failure_to_report_an_incident_of_improper_sexual_conduct_to_the_proper_authorities(Claim, Event)
+
+exclusion_applies(Claim) :-
+    claim.arising_out_of_failure_to_report_an_incident_of_physical_abuse_to_the_proper_authorities(Claim, Event)
+
+exclusion_applies(Claim) :-
+    claim.arising_out_of_the_withholding_of_pertinent_information_concerning_improper_sexual_conduct_from_the_proper_authorities(Claim, Event)
+
+exclusion_applies(Claim) :-
+    claim.arising_out_of_the_withholding_of_pertinent_information_concerning_physical_abuse_from_the_proper_authorities(Claim, Event)
+
+    % L
+        % "the Member"? Why not "a Member"?
+        % In this case, "their" meaning of the "person, organization, or business enterprise"
+        % Also, same note as on O
+exclusion_applies(Claim) :-
+    claim.alleging_personal_injury(Claim, yes) &
+    claim.personal_injury_arising_out_of_event(Claim, Event) &
+    event.is_publication_or_utterance_made_by_or_at_direction_of_the_member_with_knowledge_of_falsity_thereof_concerning_any_person_organization_or_business_enterprise_or_their_products_or_services(Event, yes)
+
+    % M
+exclusion_applies(Claim) :-
+    claim.arising_out_of_a_breach_of_responsibility_obligation_or_duty_imposed_upon_a_fiduciary(Claim, yes)
+
+    % N
+exclusion_applies(Claim) :-
+    claim.regarding_damages(Claim, Damages) &
+    damages.arising_out_of_status_of_entity_as_a_fiscal_sponsor(Damages, Entity) &
+    is_member_for_claim(Claim, Entity) &
+    ~covered_fiscal_sponsor_damages(Claim, Entity)
+
+        % Which entity is "that entity"? The "organization" or the "Member"?
+            % Assuming the FiscalSponsor (i.e. the member) for now
+            % No idea why "person, entity or organization" is used here, when it only referred to an organization before. Only addressing the "organization" part in the code for now.
+covered_fiscal_sponsor_damages(Claim, FiscalSponsor) :-
+    claim.organization(Claim, Organization) &
+    organization.entered_into_fiscal_sponsor_agreement_arising_out_of_or_in_connection_with_fiscal_sponsors_status_as_such_for_the_organization(Organization, FiscalSponsorAgreement) &
+    fiscal_sponsor_agreement.between_entities(Organization, FiscalSponsor) &
+    claim.insuring_company(Claim, InsuringCompany) &
+    fiscal_sponsor_agreement.provided_to_by(FiscalSponsorAgreement, InsuringCompany, Organization) &
+    claim.organization_provided_to_insuring_company_any_underwriting_information_and_paid_any_additional_premium_required_by_insuring_company(Claim)
+
+    % O
+        % Maybe should encode additional lines of the exclusion, but not obviously so, as those lines may be implicit in this question
+exclusion_applies(Claim) :-
+    claim.brought_about_or_contributed_to_by_the_fraud_or_dishonesty_of_a_member(Claim, yes)
+
+    % P
+        % (Note): Not intuitively clear what the meaning is of the last sentence of the exclusion. Does it not apply when the person harassed is a third party? Or when the harasser is a third party?
+exclusion_applies(Claim) :-
+    claim.arising_from_or_in_any_way_related_to_improper_sexual_conduct_of_any_person(Claim, yes) &
+
+    % Q
+exclusion_applies(Claim) :-
+    claim.arising_from_matters_which_may_be_deemed_uninsurable_under_the_law_pursuant_to_whcih_this_policy_shall_be_construed(Claim, Event)
+
+    % R
+exclusion_applies(Claim) :-
+    claim.arising_out_of_or_contributed_to_by_mold_fungus_or_microbial_contamination(Claim, Event)
+
+    % S
+exclusion_applies(Claim) :-
+    claim.resulted_from_event(Claim, Event) &
+    event.is_actual_or_alleged_act_or_omission_by_entity(Event, ActingEntity) &
+    event.actual_or_alleged_act_or_omission_made_by_entity_in_capacity_or_by_reason_of_status_as_related_to_entity(Event, BelongingEntity) &
+    is_excluded_member(BelongingEntity, ActingEntity) &
+    claim.organization(Claim, ClaimOrg) &
+    distinct(BelongingEntity, ClaimOrg)
+
+is_excluded_member(Org, Person) :-
+    organization.director_entity(Org, Person)
+
+is_excluded_member(Org, Person) :-
+    organization.trustee_entity(Org, Person)
+
+is_excluded_member(Org, Person) :-
+    organization.officer_entity(Org, Person)
+
+is_excluded_member(Org, Person) :-
+    organization.employee(Org, Person)
+
+is_excluded_member(Org, Person) :-
+    organization.committee_member_entity(Org, Person)
+
+is_excluded_member(Org, Person) :-
+    organization.student_in_training(Org, Person)
+
+is_excluded_member(Org, Person) :-
+    organization.intern(Org, Person)
+
+is_excluded_member(Org, Person) :-
+    organization.volunteer_entity(Org, Person)
+
+    % T
+        % Same note as on O 
+        % Same note as on L
+exclusion_applies(Claim) :-
+    claim.alleging_personal_injury(Claim, yes) &
+    claim.personal_injury_arising_out_of_event(Claim, Event) &
+    event.is_violation_of_a_penal_statute_or_ordinance_committed_by_or_with_the_knowledge_or_consent_of_the_member(Event, yes)
+
+
+    % U
+exclusion_applies(Claim) :-
+    claim.resulted_from_event(Claim, Event) &
+    event.is_a_member_having_gained_any_personal_profit_or_advantage_to_which_the_member_was_not_legally_entitled(Event, yes)
+
+    % V
+exclusion_applies(Claim) :-
+    claim.arising_from_or_in_any_way_related_to_any_form_of_physical_abuse(Claim, Event)
+
+    % W
+exclusion_applies(Claim) :-
+    claim.all_or_part_is_directly_or_indirectly_based_upon_attributable_to_arising_out_of_resulting_from_or_in_any_manner_related_to_or_in_consequence_of(Claim, Event) &
+    is_excluded_pollutant_situation(Claim, Event)
+
+        % 1
+            % They seem to be missing a comma between "migration" and "release"
+is_excluded_pollutant_situation(Claim, Event) :-
+    event.is_actual_alleged_or_threatened_pollutant_situation(Event, SituationType) &
+    member(SituationType, [presence, discharge, dispersal, seepage, migration, release, escape])
+
+        % 2 a
+            % Ambiguous whether responding to "Pollutants" or "effects of "Pollutants""
+is_excluded_pollutant_situation(Claim, Event) :-
+    is_demand_order_statutory_or_regulatory_requirement_that_someone_interact_with_pollutant_in_way(Event, Way) &
+    member(Way, [investigate, test_for, monitor, clean_up, remove, contain, treat, detoxify, neutralize, respond_to_effects_of, address_effects_of])
+
+
+is_demand_order_statutory_or_regulatory_requirement_that(Event, Way) :-
+    event.is_demand_that_someone_interact_with_pollutant_in_way(Event, Way)
+
+is_demand_order_statutory_or_regulatory_requirement_that(Event, Way) :-
+    event.is_order_that_someone_interact_with_pollutant_in_way(Event, Way)
+
+is_demand_order_statutory_or_regulatory_requirement_that(Event, Way) :-
+    event.is_statutory_requirement_that_someone_interact_with_pollutant_in_way(Event, Way)
+
+is_demand_order_statutory_or_regulatory_requirement_that(Event, Way) :-
+    event.is_regulatory_requirement_that_someone_interact_with_pollutant_in_way(Event, Way)
+
+        % 2 b
+is_excluded_pollutant_situation(Claim, Event) :-
+    event.is_demand_on_behalf_of_a_governmental_authority_for_damages_due_to_pollutant_interaction(Event, Way) &
+    member(Way, [investigate, test_for, monitor, clean_up, remove, contain, treat, detoxify, neutralize, respond_to_effects_of, assess_effects_of])
+
+    % X
+exclusion_applies(Claim) :-
+    claim.based_on_arising_out_of_directly_or_indirectly_resulting_from_the_printing_of_periodicals_advertising_matter_or_any_and_all_jobs_taken_by_any_member_to_by_printed_for_a_third_party_when_the_periodical_advertising_matter_or_other_printing_is_not_a_regular_part_of_any_members_own_publication(Claim, yes)
+
+    % Y
+        % Again, why "the Member" here? Why not "a Member"? 
+exclusion_applies(Claim) :-
+    claim.based_upon_arising_out_of_directly_or_indirectly_resulting_from_or_in_consequence_of_or_in_any_way_involving_the_rendering_or_failure_to_render_a_professional_service_in_connection_with_entitys_business(Event, Entity) &
+    is_member_for_claim(Claim, Entity)
+
+    % Z
+        % Implicit in "claim_results_from_act_committed_during_policy_period"
+
+    % AA
+exclusion_applies(Claim) :-
+    claim.liability_for_payment_under_federal_state_or_local_wage_and_hour_or_similar_laws(Claim, Payment)
