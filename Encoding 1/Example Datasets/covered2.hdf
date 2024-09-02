@@ -29,11 +29,11 @@ claim.wrongful_act_committed_by_spouse_or_domestic_partner_of_member(claim1, no)
 claim.claim_against_member_arose_out_of_acts_taken_solely_in_capacity_as_such(claim1, no) % If no and claimant type is director, trustee, elected_or_appointed_officer, committee_member, volunteer, or spouse_or_domestic_partner_of_member, not covered
 
 % Only relevant if claim.claimant_type is new_subsidiary
-claim.new_subsidiary_is_501c3(claim1, yes) % If no, claim.new_subsidiary_written_approval_received_from_insuring_company must be yes. Irrelevant otherwise.
-claim.new_subsidiary_written_notice_given_to_insuring_company(claim1, yes) % If no and new_subsidiary, not covered
+claim.new_subsidiary_is_501c3(claim1, no) % If no and new_subsidiary, claim.new_subsidiary_written_approval_received_from_insuring_company must be yes. Irrelevant otherwise.
+claim.new_subsidiary_written_notice_given_to_insuring_company(claim1, no) % If no and new_subsidiary, not covered
 claim.new_subsidiary_underwriting_info_given_to_insuring_company(claim1, yes) % If no and new_subsidiary, not covered
 claim.new_subsidiary_additional_premium_given_to_insuring_company(claim1, yes) % If no and new_subsidiary, not covered
-claim.new_subsidiary_written_approval_received_from_insuring_company(claim1, yes) % If no and new_subsidiary, not covered
+claim.new_subsidiary_written_approval_received_from_insuring_company(claim1, yes) % If no, new_subsidiary, and claim.new_subsidiary_is_501c3 is no, not covered
 
 % Only relevant if claim.claimant_type is successor_org
 claim.merger_consolidation_or_acquisition_written_notice_and_information_given_to_insuring_company(claim1, no)
