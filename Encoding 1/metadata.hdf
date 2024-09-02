@@ -12,6 +12,7 @@ codomain(policy.type, product)
 unique(policy.type, yes)
 total(policy.type, yes)
 
+% Note: codomain is entity, since it can be a person or an organization
 type(policy.insuree, attributerelation)
 domain(policy.insuree, policy)
 codomain(policy.insuree, entity)
@@ -43,6 +44,7 @@ type(claim, class)
 attribute(claim, claim.claimant)
 
 
+% Note: codomain is entity, since it can be a person or an organization
 type(claim.claimant, attributerelation)
 domain(claim.claimant, claim)
 codomain(claim.claimant, entity)
