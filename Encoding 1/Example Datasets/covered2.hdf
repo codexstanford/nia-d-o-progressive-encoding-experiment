@@ -5,7 +5,6 @@
 type(policy1, policy)
 type(org1, entity)
 type(newsubsidiary1, entity)
-type(claim1, claim)
 type(claim1, doliabilityclaim)
 
 %%% Policy %%%
