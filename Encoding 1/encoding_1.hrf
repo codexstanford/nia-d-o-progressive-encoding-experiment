@@ -1,0 +1,132 @@
+
+covers(Policy, Claim) :-
+    policy.type(Policy, nia_d_o_liability) &
+    covered_under_policy(Claim, Policy, nia_d_o_liability)
+
+% In the context of D&O, policy.insuree holds of Named Members, which are organizations declared in Item 1 of the Declarations of the policy
+covered_under_policy(Claim, Policy, nia_d_o_liability) :-
+    claim.claimant_org(Claim, Organization) &
+    policy.insuree(Policy, Organization) &
+    insurable_event(Claim, Policy) &            % A
+    conditions_met(Claim, Policy) &             % B
+    ~exclusion_applies(Claim, Policy)           % C (Encoding removed for this demo, per Chris Reed's instruction. Treating this as a base relation for now.)
+
+
+
+%%%% A
+insurable_event(Claim, Policy) :-
+    filed_by_on_behalf_of_or_with_respect_to_valid_entity(Claim, Policy) &  % 1
+    regarding_covered_wrongful_act(Claim, Policy) &                         % 3 and 4
+    covered_monetary_damages(Claim) &                               % 5, 6, and 7
+    request_from_valid_entity(Claim) &                              % 8
+    claim.member_voluntarily_made_payment_admitted_liability_or_incurred_defense_costs_without_insuring_company_prior_written_consent(Claim, no) & % 2
+    claim.wrongful_act_committed_by_spouse_or_domestic_partner_of_member(Claim, no) % 9
+
+% 1.a
+filed_by_on_behalf_of_or_with_respect_to_valid_entity(Claim, Policy) :-
+    claim.claimant_type(Claim, organization)
+
+filed_by_on_behalf_of_or_with_respect_to_valid_entity(Claim, Policy) :-
+    claim.claimant_type(Claim, ClaimantType) &
+    member(ClaimantType, [
+        director,
+        trustee,
+        elected_or_appointed_officer,
+        committee_member,
+        volunteer,
+        spouse_or_domestic_partner_of_member
+    ]) &
+    claim.claim_against_member_arose_out_of_acts_taken_solely_in_capacity_as_such(Claim, yes)
+
+
+% 1.b
+% claim or wrongful act of a deceased member or a claim against the estate, heirs, or legal representaives of such a Member
+filed_by_on_behalf_of_or_with_respect_to_valid_entity(Claim, Policy) :-
+    claim.claimant_type(Claim, ClaimantType) &
+    member(ClaimantType, [
+        deceased_member,
+        estate_heirs_or_legal_rep_of_deceased_member
+    ])
+
+
+% 1.c
+filed_by_on_behalf_of_or_with_respect_to_valid_entity(Claim, Policy) :-
+    claim.claimant_type(Claim, existing_subsidiary) &
+    claim.claimant(Claim, Claimant) &
+    policy.insuree(Policy, Claimant)
+
+
+% 1.d
+filed_by_on_behalf_of_or_with_respect_to_valid_entity(Claim, Policy) :-
+    claim.claimant_type(Claim, new_subsidiary) &
+    claim.new_subsidiary_is_501c3(Claim, yes) &
+    claim.new_subsidiary_written_notice_given_to_insuring_company(Claim, yes) &
+    claim.new_subsidiary_underwriting_info_given_to_insuring_company(Claim, yes) &
+    claim.new_subsidiary_additional_premium_given_to_insuring_company(Claim, yes)
+
+
+% 1.e
+filed_by_on_behalf_of_or_with_respect_to_valid_entity(Claim, Policy) :-
+    claim.claimant_type(Claim, new_subsidiary) &
+    claim.new_subsidiary_is_501c3(Claim, no) &
+    claim.new_subsidiary_written_notice_given_to_insuring_company(Claim, yes) &
+    claim.new_subsidiary_underwriting_info_given_to_insuring_company(Claim, yes) &
+    claim.new_subsidiary_written_approval_received_from_insuring_company(Claim, yes) &
+    claim.new_subsidiary_additional_premium_given_to_insuring_company(Claim, yes)
+
+
+% 1.f
+filed_by_on_behalf_of_or_with_respect_to_valid_entity(Claim, Policy) :-
+    claim.claimant_type(Claim, successor_org) &
+    claim.merger_consolidation_or_acquisition_written_notice_and_information_given_to_insuring_company(Claim, yes) &
+    claim.merger_consolidation_or_acquisition_additional_premium_given_to_insuring_company(Claim, yes)
+
+
+
+% 3 and 4
+    % Subgoals 1-3 are point 3, last two subgoals are point 4
+regarding_covered_wrongful_act(Claim, Policy) :-
+    claim.resulted_from_breach_of_duty_error_neglect_omission_or_act(Claim, yes) &
+    wrongful_act_occurred_during_policy_period(Claim, Policy) &
+    claim.wrongful_act_committed_solely_in_course_of_activities_of_org(Claim, yes) &
+    claim.wrongful_act_result_type(Claim, ResultType) &
+    member(ResultType, [
+        personal_injury,
+        claim_of_harassment_or_discrimination_brought_by_volunteer,
+        claim_of_harassment_or_discrimination_brought_by_third_party_business_invitee,
+        other_result
+    ])
+
+
+    % 3
+wrongful_act_occurred_during_policy_period(Claim, Policy) :-
+    claim.date_of_wrongful_act(Claim, ActDate) &
+    policy.startdate(Policy, SD) &
+    policy.enddate(Policy, ED) &
+    symleq(SD, ActDate) &
+    symleq(ActDate, ED)
+
+
+% 5, 6, 7
+covered_monetary_damages(Claim) :-
+    claim.monetary_damages_sought(Claim, yes) & % 5
+    claim.monetary_damages_consist_of_judgment_for_compensatory_damages(Claim, yes) & % 6
+    claim.monetary_damages_solely_consist_of_taxes_severance_reimbursements_for_expenses_resulting_from_employment_equitable_or_injunctive_relief_and_or_matters_uninsurable(DamagesEvent, no) % 7
+
+
+% 8
+request_from_valid_entity(Claim) :-
+    claim.organization_organized_chiefly_to_provide_charitable_religious_educational_scientific_health_or_human_services(Claim, yes) &
+    claim.organization_is_501c3_or_corresponding(Claim, yes) &
+    claim.organization_incorporated_or_qualified_to_do_business_in_california(Claim, yes)
+
+%%%% B
+conditions_met(Claim, Policy) :-
+    policy.canceled(Policy, no) & % 10
+    claim.each_member_has_cooperated(Claim, yes) & % 11
+    claim.each_member_promptly_gave_notice_to_insuring_company_of_claim_for_wrongful_act_committed_during_policy_period(Claim, yes) & % 12
+    claim.each_member_promptly_gave_written_notice_to_insuring_company_of_actual_or_potential_claim_and_gave_required_info_and_cooperation(Claim, yes) & % 13
+    claim.all_representations_and_statements_in_application_for_policy_are_true(Claim, yes) & % 14
+    claim.responsibility_to_pay_damages_determined_in_suit_on_merits_determined_in_usa(Claim, yes) & % 15
+    claim.transferred_rights_of_payment_recovery_to_insuring_company(Claim, yes) % 16
+

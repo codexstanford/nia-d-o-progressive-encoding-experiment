@@ -1,0 +1,269 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%% Policy relations %%%%%%%%%%%%%%%%%%%%%%%%%%%
+type(policy, class)
+attribute(policy, policy.type)
+attribute(policy, policy.insuree)
+attribute(policy, policy.startdate)
+attribute(policy, policy.enddate)
+attribute(policy, policy.canceled)
+
+type(policy.type, attributerelation)
+domain(policy.type, policy)
+codomain(policy.type, product)
+unique(policy.type, yes)
+total(policy.type, yes)
+
+type(policy.insuree, attributerelation)
+domain(policy.insuree, policy)
+codomain(policy.insuree, entity)
+unique(policy.insuree, no)
+total(policy.insuree, yes)
+
+type(policy.startdate, attributerelation)
+domain(policy.startdate, policy)
+codomain(policy.startdate, date)
+unique(policy.startdate, yes)
+total(policy.startdate, yes)
+
+type(policy.enddate, attributerelation)
+domain(policy.enddate, policy)
+codomain(policy.enddate, date)
+unique(policy.enddate, yes)
+total(policy.enddate, yes)
+
+
+type(policy.canceled, attributerelation)
+domain(policy.canceled, policy)
+codomain(policy.canceled, boolean)
+unique(policy.canceled, yes)
+total(policy.canceled, yes)
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% Claim relations %%%%%%%%%%%%%%%%%%%%%%%%%%%
+type(claim, class)
+attribute(claim, claim.claimant)
+
+
+type(claim.claimant, attributerelation)
+domain(claim.claimant, claim)
+codomain(claim.claimant, entity)
+unique(claim.claimant, no)
+total(claim.claimant, yes)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% Directors and Officers Liability Claim attribute relations %%%%%%%%%%%%%%%%%%%%%%%%%%%
+type(doliabilityclaim, class)
+superclass(doliabilityclaim, claim)
+
+attribute(doliabilityclaim, claim.claimant_org) 
+attribute(doliabilityclaim, claim.member_voluntarily_made_payment_admitted_liability_or_incurred_defense_costs_without_insuring_company_prior_written_consent) 
+attribute(doliabilityclaim, claim.wrongful_act_committed_by_spouse_or_domestic_partner_of_member) 
+attribute(doliabilityclaim, claim.claimant_type) 
+attribute(doliabilityclaim, claim.claim_against_member_arose_out_of_acts_taken_solely_in_capacity_as_such) 
+attribute(doliabilityclaim, claim.claimant) 
+attribute(doliabilityclaim, claim.new_subsidiary_is_501c3) 
+attribute(doliabilityclaim, claim.new_subsidiary_written_notice_given_to_insuring_company) 
+attribute(doliabilityclaim, claim.new_subsidiary_underwriting_info_given_to_insuring_company) 
+attribute(doliabilityclaim, claim.new_subsidiary_additional_premium_given_to_insuring_company) 
+attribute(doliabilityclaim, claim.new_subsidiary_written_approval_received_from_insuring_company) 
+attribute(doliabilityclaim, claim.merger_consolidation_or_acquisition_written_notice_and_information_given_to_insuring_company) 
+attribute(doliabilityclaim, claim.merger_consolidation_or_acquisition_additional_premium_given_to_insuring_company) 
+attribute(doliabilityclaim, claim.resulted_from_breach_of_duty_error_neglect_omission_or_act) 
+attribute(doliabilityclaim, claim.wrongful_act_committed_solely_in_course_of_activities_of_org) 
+attribute(doliabilityclaim, claim.wrongful_act_result_type) 
+attribute(doliabilityclaim, claim.date_of_wrongful_act) 
+attribute(doliabilityclaim, claim.monetary_damages_sought) 
+attribute(doliabilityclaim, claim.monetary_damages_consist_of_judgment_for_compensatory_damages) 
+attribute(doliabilityclaim, claim.monetary_damages_solely_consist_of_taxes_severance_reimbursements_for_expenses_resulting_from_employment_equitable_or_injunctive_relief_and_or_matters_uninsurable) 
+attribute(doliabilityclaim, claim.organization_organized_chiefly_to_provide_charitable_religious_educational_scientific_health_or_human_services) 
+attribute(doliabilityclaim, claim.organization_is_501c3_or_corresponding) 
+attribute(doliabilityclaim, claim.organization_incorporated_or_qualified_to_do_business_in_california) 
+attribute(doliabilityclaim, claim.each_member_has_cooperated) 
+attribute(doliabilityclaim, claim.each_member_promptly_gave_notice_to_insuring_company_of_claim_for_wrongful_act_committed_during_policy_period) 
+attribute(doliabilityclaim, claim.each_member_promptly_gave_written_notice_to_insuring_company_of_actual_or_potential_claim_and_gave_required_info_and_cooperation) 
+attribute(doliabilityclaim, claim.all_representations_and_statements_in_application_for_policy_are_true) 
+attribute(doliabilityclaim, claim.responsibility_to_pay_damages_determined_in_suit_on_merits_determined_in_usa) 
+attribute(doliabilityclaim, claim.transferred_rights_of_payment_recovery_to_insuring_company)
+
+type(claim.claimant_org, attributerelation)
+domain(claim.claimant_org, doliabilityclaim)
+codomain(claim.claimant_org, entity)
+unique(claim.claimant_org, yes)
+total(claim.claimant_org, yes)
+
+type(claim.member_voluntarily_made_payment_admitted_liability_or_incurred_defense_costs_without_insuring_company_prior_written_consent, attributerelation)
+domain(claim.member_voluntarily_made_payment_admitted_liability_or_incurred_defense_costs_without_insuring_company_prior_written_consent, doliabilityclaim)
+codomain(claim.member_voluntarily_made_payment_admitted_liability_or_incurred_defense_costs_without_insuring_company_prior_written_consent, boolean) 
+unique(claim.member_voluntarily_made_payment_admitted_liability_or_incurred_defense_costs_without_insuring_company_prior_written_consent, yes)
+total(claim.member_voluntarily_made_payment_admitted_liability_or_incurred_defense_costs_without_insuring_company_prior_written_consent, yes)
+
+type(claim.wrongful_act_committed_by_spouse_or_domestic_partner_of_member, attributerelation)
+domain(claim.wrongful_act_committed_by_spouse_or_domestic_partner_of_member, doliabilityclaim)
+codomain(claim.wrongful_act_committed_by_spouse_or_domestic_partner_of_member, boolean)
+unique(claim.wrongful_act_committed_by_spouse_or_domestic_partner_of_member, yes)
+total(claim.wrongful_act_committed_by_spouse_or_domestic_partner_of_member, yes)
+
+type(claim.claimant_type, attributerelation)
+domain(claim.claimant_type, doliabilityclaim)
+codomain(claim.claimant_type, claimant_type)
+unique(claim.claimant_type, yes)
+total(claim.claimant_type, yes)
+
+type(claim.claim_against_member_arose_out_of_acts_taken_solely_in_capacity_as_such, attributerelation)
+domain(claim.claim_against_member_arose_out_of_acts_taken_solely_in_capacity_as_such, doliabilityclaim)
+codomain(claim.claim_against_member_arose_out_of_acts_taken_solely_in_capacity_as_such, boolean)
+unique(claim.claim_against_member_arose_out_of_acts_taken_solely_in_capacity_as_such, yes)
+total(claim.claim_against_member_arose_out_of_acts_taken_solely_in_capacity_as_such, yes)
+
+
+type(claim.new_subsidiary_is_501c3, attributerelation)
+domain(claim.new_subsidiary_is_501c3, doliabilityclaim)
+codomain(claim.new_subsidiary_is_501c3, boolean)
+unique(claim.new_subsidiary_is_501c3, yes)
+total(claim.new_subsidiary_is_501c3, no)
+
+type(claim.new_subsidiary_written_notice_given_to_insuring_company, attributerelation)
+domain(claim.new_subsidiary_written_notice_given_to_insuring_company, doliabilityclaim)
+codomain(claim.new_subsidiary_written_notice_given_to_insuring_company, boolean)
+unique(claim.new_subsidiary_written_notice_given_to_insuring_company, yes)
+total(claim.new_subsidiary_written_notice_given_to_insuring_company, no)
+
+type(claim.new_subsidiary_underwriting_info_given_to_insuring_company, attributerelation)
+domain(claim.new_subsidiary_underwriting_info_given_to_insuring_company, doliabilityclaim)
+codomain(claim.new_subsidiary_underwriting_info_given_to_insuring_company, boolean)
+unique(claim.new_subsidiary_underwriting_info_given_to_insuring_company, yes)
+total(claim.new_subsidiary_underwriting_info_given_to_insuring_company, no)
+
+type(claim.new_subsidiary_additional_premium_given_to_insuring_company, attributerelation)
+domain(claim.new_subsidiary_additional_premium_given_to_insuring_company, doliabilityclaim)
+codomain(claim.new_subsidiary_additional_premium_given_to_insuring_company, boolean)
+unique(claim.new_subsidiary_additional_premium_given_to_insuring_company, yes)
+total(claim.new_subsidiary_additional_premium_given_to_insuring_company, no)
+
+type(claim.new_subsidiary_written_approval_received_from_insuring_company, attributerelation)
+domain(claim.new_subsidiary_written_approval_received_from_insuring_company, doliabilityclaim)
+codomain(claim.new_subsidiary_written_approval_received_from_insuring_company, boolean)
+unique(claim.new_subsidiary_written_approval_received_from_insuring_company, yes)
+total(claim.new_subsidiary_written_approval_received_from_insuring_company, no)
+
+type(claim.merger_consolidation_or_acquisition_written_notice_and_information_given_to_insuring_company, attributerelation)
+domain(claim.merger_consolidation_or_acquisition_written_notice_and_information_given_to_insuring_company, doliabilityclaim)
+codomain(claim.merger_consolidation_or_acquisition_written_notice_and_information_given_to_insuring_company, boolean)
+unique(claim.merger_consolidation_or_acquisition_written_notice_and_information_given_to_insuring_company, yes)
+total(claim.merger_consolidation_or_acquisition_written_notice_and_information_given_to_insuring_company, no)
+
+type(claim.merger_consolidation_or_acquisition_additional_premium_given_to_insuring_company, attributerelation)
+domain(claim.merger_consolidation_or_acquisition_additional_premium_given_to_insuring_company, doliabilityclaim)
+codomain(claim.merger_consolidation_or_acquisition_additional_premium_given_to_insuring_company, boolean)
+unique(claim.merger_consolidation_or_acquisition_additional_premium_given_to_insuring_company, yes)
+total(claim.merger_consolidation_or_acquisition_additional_premium_given_to_insuring_company, no)
+
+type(claim.resulted_from_breach_of_duty_error_neglect_omission_or_act, attributerelation)
+domain(claim.resulted_from_breach_of_duty_error_neglect_omission_or_act, doliabilityclaim)
+codomain(claim.resulted_from_breach_of_duty_error_neglect_omission_or_act, boolean)
+unique(claim.resulted_from_breach_of_duty_error_neglect_omission_or_act, yes)
+total(claim.resulted_from_breach_of_duty_error_neglect_omission_or_act, yes)
+
+type(claim.wrongful_act_committed_solely_in_course_of_activities_of_org, attributerelation)
+domain(claim.wrongful_act_committed_solely_in_course_of_activities_of_org, doliabilityclaim)
+codomain(claim.wrongful_act_committed_solely_in_course_of_activities_of_org, boolean)
+unique(claim.wrongful_act_committed_solely_in_course_of_activities_of_org, yes)
+total(claim.wrongful_act_committed_solely_in_course_of_activities_of_org, yes)
+
+type(claim.wrongful_act_result_type, attributerelation)
+domain(claim.wrongful_act_result_type, doliabilityclaim)
+codomain(claim.wrongful_act_result_type, wrongful_act_result_type)
+unique(claim.wrongful_act_result_type, yes)
+total(claim.wrongful_act_result_type, yes)
+
+type(claim.date_of_wrongful_act, attributerelation)
+domain(claim.date_of_wrongful_act, doliabilityclaim)
+codomain(claim.date_of_wrongful_act, boolean)
+unique(claim.date_of_wrongful_act, yes)
+total(claim.date_of_wrongful_act, yes)
+
+type(claim.monetary_damages_sought, attributerelation)
+domain(claim.monetary_damages_sought, doliabilityclaim)
+codomain(claim.monetary_damages_sought, boolean)
+unique(claim.monetary_damages_sought, yes)
+total(claim.monetary_damages_sought, yes)
+
+type(claim.monetary_damages_consist_of_judgment_for_compensatory_damages, attributerelation)
+domain(claim.monetary_damages_consist_of_judgment_for_compensatory_damages, doliabilityclaim)
+codomain(claim.monetary_damages_consist_of_judgment_for_compensatory_damages, boolean)
+unique(claim.monetary_damages_consist_of_judgment_for_compensatory_damages, yes)
+total(claim.monetary_damages_consist_of_judgment_for_compensatory_damages, yes)
+
+type(claim.monetary_damages_solely_consist_of_taxes_severance_reimbursements_for_expenses_resulting_from_employment_equitable_or_injunctive_relief_and_or_matters_uninsurable, attributerelation)
+domain(claim.monetary_damages_solely_consist_of_taxes_severance_reimbursements_for_expenses_resulting_from_employment_equitable_or_injunctive_relief_and_or_matters_uninsurable, doliabilityclaim)
+codomain(claim.monetary_damages_solely_consist_of_taxes_severance_reimbursements_for_expenses_resulting_from_employment_equitable_or_injunctive_relief_and_or_matters_uninsurable, boolean)
+unique(claim.monetary_damages_solely_consist_of_taxes_severance_reimbursements_for_expenses_resulting_from_employment_equitable_or_injunctive_relief_and_or_matters_uninsurable, yes)
+total(claim.monetary_damages_solely_consist_of_taxes_severance_reimbursements_for_expenses_resulting_from_employment_equitable_or_injunctive_relief_and_or_matters_uninsurable, yes)
+
+type(claim.organization_organized_chiefly_to_provide_charitable_religious_educational_scientific_health_or_human_services, attributerelation)
+domain(claim.organization_organized_chiefly_to_provide_charitable_religious_educational_scientific_health_or_human_services, doliabilityclaim)
+codomain(claim.organization_organized_chiefly_to_provide_charitable_religious_educational_scientific_health_or_human_services, boolean)
+unique(claim.organization_organized_chiefly_to_provide_charitable_religious_educational_scientific_health_or_human_services, yes)
+total(claim.organization_organized_chiefly_to_provide_charitable_religious_educational_scientific_health_or_human_services, yes)
+
+type(claim.organization_is_501c3_or_corresponding, attributerelation)
+domain(claim.organization_is_501c3_or_corresponding, doliabilityclaim)
+codomain(claim.organization_is_501c3_or_corresponding, boolean)
+unique(claim.organization_is_501c3_or_corresponding, yes)
+total(claim.organization_is_501c3_or_corresponding, yes)
+
+type(claim.organization_incorporated_or_qualified_to_do_business_in_california, attributerelation)
+domain(claim.organization_incorporated_or_qualified_to_do_business_in_california, doliabilityclaim)
+codomain(claim.organization_incorporated_or_qualified_to_do_business_in_california, boolean)
+unique(claim.organization_incorporated_or_qualified_to_do_business_in_california, yes)
+total(claim.organization_incorporated_or_qualified_to_do_business_in_california, yes)
+
+type(claim.each_member_has_cooperated, attributerelation)
+domain(claim.each_member_has_cooperated, doliabilityclaim)
+codomain(claim.each_member_has_cooperated, boolean)
+unique(claim.each_member_has_cooperated, yes)
+total(claim.each_member_has_cooperated, yes)
+
+type(claim.each_member_promptly_gave_notice_to_insuring_company_of_claim_for_wrongful_act_committed_during_policy_period, attributerelation)
+domain(claim.each_member_promptly_gave_notice_to_insuring_company_of_claim_for_wrongful_act_committed_during_policy_period, doliabilityclaim)
+codomain(claim.each_member_promptly_gave_notice_to_insuring_company_of_claim_for_wrongful_act_committed_during_policy_period, boolean)
+unique(claim.each_member_promptly_gave_notice_to_insuring_company_of_claim_for_wrongful_act_committed_during_policy_period, yes)
+total(claim.each_member_promptly_gave_notice_to_insuring_company_of_claim_for_wrongful_act_committed_during_policy_period, yes)
+
+type(claim.each_member_promptly_gave_written_notice_to_insuring_company_of_actual_or_potential_claim_and_gave_required_info_and_cooperation, attributerelation)
+domain(claim.each_member_promptly_gave_written_notice_to_insuring_company_of_actual_or_potential_claim_and_gave_required_info_and_cooperation, doliabilityclaim)
+codomain(claim.each_member_promptly_gave_written_notice_to_insuring_company_of_actual_or_potential_claim_and_gave_required_info_and_cooperation, boolean)
+unique(claim.each_member_promptly_gave_written_notice_to_insuring_company_of_actual_or_potential_claim_and_gave_required_info_and_cooperation, yes) 
+total(claim.each_member_promptly_gave_written_notice_to_insuring_company_of_actual_or_potential_claim_and_gave_required_info_and_cooperation, yes)
+
+type(claim.all_representations_and_statements_in_application_for_policy_are_true, attributerelation)
+domain(claim.all_representations_and_statements_in_application_for_policy_are_true, doliabilityclaim)
+codomain(claim.all_representations_and_statements_in_application_for_policy_are_true, boolean)
+unique(claim.all_representations_and_statements_in_application_for_policy_are_true, yes)
+total(claim.all_representations_and_statements_in_application_for_policy_are_true, yes)
+
+type(claim.responsibility_to_pay_damages_determined_in_suit_on_merits_determined_in_usa, attributerelation)
+domain(claim.responsibility_to_pay_damages_determined_in_suit_on_merits_determined_in_usa, doliabilityclaim)
+codomain(claim.responsibility_to_pay_damages_determined_in_suit_on_merits_determined_in_usa, boolean)
+unique(claim.responsibility_to_pay_damages_determined_in_suit_on_merits_determined_in_usa, yes)
+total(claim.responsibility_to_pay_damages_determined_in_suit_on_merits_determined_in_usa, yes)
+
+type(claim.transferred_rights_of_payment_recovery_to_insuring_company, attributerelation)
+domain(claim.transferred_rights_of_payment_recovery_to_insuring_company, doliabilityclaim)
+codomain(claim.transferred_rights_of_payment_recovery_to_insuring_company, boolean)
+unique(claim.transferred_rights_of_payment_recovery_to_insuring_company, yes)
+total(claim.transferred_rights_of_payment_recovery_to_insuring_company, yes)
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Classes without attributes
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+type(boolean,class)
+type(product,class)
+type(date,class)
+type(number,class)
+type(entity, class)
+
+type(claimant_type, class)
+type(wrongful_act_result_type, class)
