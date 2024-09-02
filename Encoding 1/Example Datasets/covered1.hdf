@@ -1,0 +1,56 @@
+%%%%%% Covered example 1 %%%%%%
+%%%%%% Simple covered organization %%%%%%
+
+%%% Types %%%
+type(policy1, policy)
+type(org1, entity)
+type(claim1, claim)
+type(claim1, doliabilityclaim)
+
+%%% Policy %%%
+policy.type(policy1, nia_d_o_liability)
+policy.insuree(policy1, org1)
+policy.startdate(policy1, 2024_01_01)
+policy.enddate(policy1, 2025_01_01)
+policy.canceled(policy1, no) % If yes, not covered
+
+%%% Claim %%%
+claim.claimant(claim1, org1)
+
+claim.claimant_org(claim1, org1)
+claim.organization_organized_chiefly_to_provide_charitable_religious_educational_scientific_health_or_human_services(claim1, yes) % If no, not covered
+claim.organization_is_501c3_or_corresponding(claim1, yes) % If no, not covered
+claim.organization_incorporated_or_qualified_to_do_business_in_california(claim1, yes) % If no, not covered
+
+claim.claimant_type(claim1, organization) % If other_claimant_type, not covered
+claim.member_voluntarily_made_payment_admitted_liability_or_incurred_defense_costs_without_insuring_company_prior_written_consent(claim1, no) % If yes, not covered
+claim.wrongful_act_committed_by_spouse_or_domestic_partner_of_member(claim1, no) % If yes, not covered
+claim.claim_against_member_arose_out_of_acts_taken_solely_in_capacity_as_such(claim1, no) % If no and claimant type is director, trustee, elected_or_appointed_officer, committee_member, volunteer, or spouse_or_domestic_partner_of_member, not covered
+
+% Only relevant if claim.claimant_type is new_subsidiary
+claim.new_subsidiary_is_501c3(claim1, no)
+claim.new_subsidiary_written_notice_given_to_insuring_company(claim1, no)
+claim.new_subsidiary_underwriting_info_given_to_insuring_company(claim1, no)
+claim.new_subsidiary_additional_premium_given_to_insuring_company(claim1, no)
+claim.new_subsidiary_written_approval_received_from_insuring_company(claim1, no)
+
+% Only relevant if claim.claimant_type is successor_org
+claim.merger_consolidation_or_acquisition_written_notice_and_information_given_to_insuring_company(claim1, no)
+claim.merger_consolidation_or_acquisition_additional_premium_given_to_insuring_company(claim1, no)
+
+
+claim.date_of_wrongful_act(claim1, 2024_03_14)
+claim.resulted_from_breach_of_duty_error_neglect_omission_or_act(claim1, yes) % If no, not covered
+claim.wrongful_act_committed_solely_in_course_of_activities_of_org(claim1, yes) % If no, not covered
+claim.wrongful_act_result_type(claim1, personal_injury) % Covered unless other_excluded_result
+
+claim.monetary_damages_sought(claim1, yes) % If no, not covered
+claim.monetary_damages_consist_of_judgment_for_compensatory_damages(claim1, yes) % If no, not covered
+claim.monetary_damages_solely_consist_of_taxes_severance_reimbursements_for_expenses_resulting_from_employment_equitable_or_injunctive_relief_and_or_matters_uninsurable(claim1, no) % If yes, not covered
+
+claim.each_member_has_cooperated(claim1, yes) % If no, not covered
+claim.each_member_promptly_gave_notice_to_insuring_company_of_claim_for_wrongful_act_committed_during_policy_period(claim1, yes) % If no, not covered
+claim.each_member_promptly_gave_written_notice_to_insuring_company_of_actual_or_potential_claim_and_gave_required_info_and_cooperation(claim1, yes) % If no, not covered
+claim.all_representations_and_statements_in_application_for_policy_are_true(claim1, yes) % If no, not covered
+claim.responsibility_to_pay_damages_determined_in_suit_on_merits_determined_in_usa(claim1, yes) % If no, not covered
+claim.transferred_rights_of_payment_recovery_to_insuring_company(claim1, yes) % If no, not covered
