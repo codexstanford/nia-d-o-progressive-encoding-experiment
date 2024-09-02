@@ -60,7 +60,6 @@ attribute(doliabilityclaim, claim.member_voluntarily_made_payment_admitted_liabi
 attribute(doliabilityclaim, claim.wrongful_act_committed_by_spouse_or_domestic_partner_of_member) 
 attribute(doliabilityclaim, claim.claimant_type) 
 attribute(doliabilityclaim, claim.claim_against_member_arose_out_of_acts_taken_solely_in_capacity_as_such) 
-attribute(doliabilityclaim, claim.claimant) 
 attribute(doliabilityclaim, claim.new_subsidiary_is_501c3) 
 attribute(doliabilityclaim, claim.new_subsidiary_written_notice_given_to_insuring_company) 
 attribute(doliabilityclaim, claim.new_subsidiary_underwriting_info_given_to_insuring_company) 
