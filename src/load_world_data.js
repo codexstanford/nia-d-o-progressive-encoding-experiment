@@ -1,10 +1,12 @@
 
 // Loads the data common to all D&O Liability insurance claims into localstorage
 function load_world_data() {
-    localStorage.setItem('worldData', world_data_text);
+    for (let i = 0; i < world_data_text.length; i++) {
+        localStorage.setItem('worldDataEncodingLevel'+(i+1), world_data_text[i]);
+    }
 }
 
-let world_data_text = `
+const world_data_text_level_1 = `
 type(nia_d_o_liability, product)
 type(yes, boolean)
 type(no, boolean)
@@ -28,3 +30,5 @@ type(claim_of_harassment_or_discrimination_brought_by_volunteer, wrongful_act_re
 type(claim_of_harassment_or_discrimination_brought_by_third_party_business_invitee, wrongful_act_result_type)
 type(other_nonexcluded_result, wrongful_act_result_type)
 type(other_excluded_result, wrongful_act_result_type)`;
+
+const world_data_text = [world_data_text_level_1];
