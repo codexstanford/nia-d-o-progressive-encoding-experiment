@@ -1,0 +1,163 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+nav {
+  background-color: lightgray;
+  color: #fff;
+  text-align: center;
+  padding: 10px 0;
+  margin-bottom: 20px;
+  border: black solid 1px;
+  font-size: 40px;
+}
+
+nav a {
+  color: black;
+}
+
+
+#claims-processing-table {
+  width: 60%;
+  margin: 20px auto;
+  border-collapse: collapse;
+  border: 2px solid #000;
+  text-align: center;
+}
+
+#coverage-indicator {
+  font-weight: bold;
+  font-size: 20px;
+  position: sticky;
+  top: 0;
+}
+
+#coverage-indicator td {
+  padding: 15px;
+}
+
+#coverage-indicator.covered-true {
+  background-color: #4bc153;
+  color: black;
+}
+
+#coverage-indicator.covered-false {
+  background-color: red;
+  color: white;
+}
+
+.claims-processing-section-heading {
+  background-color: lightblue;
+  border: black solid 1px;
+  text-align: center;
+}
+
+.claims-processing-section-heading td {
+  padding: 15px;
+}
+
+.claims-processing-section-subheading {
+  background-color: #DDF8F6;
+  border: black solid 1px;
+  text-align: center;
+}
+
+.claims-processing-section-subheading td {
+  padding: 10px;
+}
+
+.claims-processing-section-subsubheading {
+  background-color: #EEF8F6;
+  border: black solid 1px;
+  text-align: center;
+}
+
+.claims-processing-section-subsubheading td {
+  padding: 10px;
+}
+
+tr.info-row {
+  background-color: #fff;
+  text-align: left;
+  font-size: 16px;
+}
+
+tr.info-row td {
+  padding: 10px;
+  border: solid black 1px;
+}
+
+input[type="checkbox"] {
+  margin-right: 5px;
+}
+
+input[type="number"] {
+  width: 75px;
+}
+
+input[type="text"] {
+  width: 75px;
+}
+
+.subelement-table {
+  width: 100%;
+  margin: 20px auto;
+  border-collapse: collapse;
+  border: 2px solid #000;
+  text-align: center;
+}
+
+.add-another-subelement-button, .remove-this-subelement-button{
+  width: 20px;
+  height: 20px;
+  border-bottom: solid 2px #4F3C35;
+  background-color:#377BB5;
+  color:white;
+  border-radius:50%;
+  font-size:20px;
+  display:inline-flex;
+  margin: 0;
+  justify-content:center;
+  align-items: center;
+  position: relative;
+  vertical-align: top;
+  cursor: pointer;
+}
+
+.collapse-subelement-table-button, .expand-subelement-table-button {
+  width: 20px;
+  height: 20px;
+  border-bottom: solid 2px #4F3C35;
+  background-color:#377BB5;
+  color:white;
+  border-radius:50%;
+  font-size: 16px;
+  display:inline-flex;
+  margin: 0;
+  justify-content:center;
+  align-items: center;
+  position: relative;
+  vertical-align: top;
+  cursor: pointer;
+}
+
+td.subelem-obj-const-input-cell input[type="text"] {
+  width: 120px;
+}
+
+tr.subelement-table-heading-row {
+  text-align: center;
+}
+
+tr.subelem-table-separator-row td {
+  height: 2px;
+  margin: 0;
+  padding: 0px;
+}
+
+#claimant_type_input {
+  width: 50%;
+  overflow: hidden;
+}
