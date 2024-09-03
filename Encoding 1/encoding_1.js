@@ -41,6 +41,8 @@ const INPUT_FIELD_IDS_TO_FACT_TEMPLATES = {
   "monetary_damages_sought_input" : "claim.monetary_damages_sought($CLAIM$, $VALUE$)",
   "monetary_damages_are_compensatory_damages_input" : "claim.monetary_damages_consist_of_judgment_for_compensatory_damages($CLAIM$, $VALUE$)",
   "monetary_damages_solely_excluded_type_input" : "claim.monetary_damages_solely_consist_of_taxes_severance_reimbursements_for_expenses_resulting_from_employment_equitable_or_injunctive_relief_and_or_matters_uninsurable($CLAIM$, $VALUE$)",
+
+  "exclusion_applies_input": "exclusion_applies($CLAIM$, $POLICY$)",
 };
 
 
@@ -143,6 +145,14 @@ function get_data_from_input_fields() {
 
     if (inputWidget.classList.contains("ignore-input-field")) {
       continue;
+    }
+
+    // Don't add exclusion_applies fact if not checked. 
+    // WARNING: This is very bespoke.
+    if (INPUT_FIELD_ID === "exclusion_applies_input") {
+        if (!inputWidget.checked) {
+            continue;
+        }
     }
     
     let inputValue = getValueFromInputWidget(inputWidget);
@@ -363,6 +373,8 @@ function build_claim_info_section() {
   rows.push(newClaimsFormInputRow([newClaimsFormInputCell(2, "checkbox", true, "The Damages consist of monetary judgment for compensatory damages and the suit or proceeding seeks compensatory damages: ", "monetary_damages_are_compensatory_damages_input")]));
   rows.push(newClaimsFormInputRow([newClaimsFormInputCell(2, "checkbox", false, "The Damages include solely taxes, severance payments, amounts to reimburse an employee for expenses incurred as a result of employment, equitable or injuctive relief and/or matters uninsurable under the law pursuant to which this policy is construed: ", "monetary_damages_solely_excluded_type_input")]));
   
+  rows.push(newHeadingRow("Exclusions", "claim-info-subheading", ["claims-processing-section-subheading"]));
+  rows.push(newClaimsFormInputRow([newClaimsFormInputCell(2, "checkbox", false, "Does an exclusion apply to this claim under the policy?", "exclusion_applies_input")]));
   return rows;
 }
 
