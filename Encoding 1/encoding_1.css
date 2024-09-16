@@ -31,7 +31,7 @@ nav a {
   font-weight: bold;
   font-size: 20px;
   position: sticky;
-  top: 0;
+  top: -1px;
 }
 
 #coverage-indicator td {
